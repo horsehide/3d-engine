@@ -111,6 +111,28 @@ function rotate_yz({x,y,z}, angle){ // around x
 	}
 }
 
+function circle({x, y, z}, radius, divisions){
+	const points = []
+	for(let i = 1; i <= divisions; i++){
+		const a = i * (2*Math.PI / divisions)
+		// x = center.x + r * cos(a)
+		// y = center.y + r * sin(a)
+		// a = 360 / divisions
+		points.push(
+			{
+				x: x + radius * Math.cos(a),
+				y: y + radius * Math.sin(a),
+				z: z,
+			}
+		)
+	}
+	return points
+}
+
+function extrude(){ // TODO
+	
+}
+
 const FPS = 67
 let dz = 0
 
@@ -158,4 +180,14 @@ function frame(){
 	setTimeout(frame, 1000 / FPS)
 }
 
-setTimeout(frame, 1000 / FPS)
+//setTimeout(frame, 1000 / FPS)
+
+function drawCircle(){
+	clear()
+	const center = {x:0, y:0, z:1}
+	for(p of circle(center, 0.7, 8)){
+		point(screen(project(p)))
+	}
+}
+
+drawCircle()
