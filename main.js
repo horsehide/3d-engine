@@ -3,6 +3,7 @@ const FG = "#50ff50"
 const POINT_SIZE = 20
 
 // cylinder (y−z)^2+(z−x)^2+(x−y)^2=3R^2
+// sphere (x-x0)^2 + (y-y0)^2 + (z-z0)^2 = r^2
 
 /*
 
@@ -113,7 +114,7 @@ function rotate_yz({x,y,z}, angle){ // around x
 
 function circle({x, y, z}, radius, divisions){
 	const points = []
-	for(let i = 1; i <= divisions; i++){
+	for(let i = 0; i < divisions; i++){
 		const a = i * (2*Math.PI / divisions)
 		// x = center.x + r * cos(a)
 		// y = center.y + r * sin(a)
@@ -128,6 +129,37 @@ function circle({x, y, z}, radius, divisions){
 	}
 	return points
 }
+
+function sphere({x, y, z}, radius){
+	// 0 < a < pi;  0 < b < 2pi
+	// x = x0 + r*sin(a)*cos(b)
+	// y = y0 + r*sin(a)*sin(b)
+	// z = z0 + r*cos(a)
+	const points = []
+	let a = 0, b = 0
+	for(let a = 0; a < Math.PI; a += 0.3){
+		for(let b = 0; b < 2 * Math.PI; b += 0.3){
+			points.push({
+					x: x + radius * Math.sin(a) * Math.cos(b),
+					y: y + radius * Math.sin(a) * Math.sin(b),
+					z: z + radius * Math.cos(a)
+			})
+		}
+	}
+	return points
+}
+	/*
+	for(let i = 0; i < divisions; i++){
+		const a = i * (Math.PI / divisions)
+		const b = i * (2 * Math.PI / divisions)
+		points.push(
+			{
+				x: x + radius * Math.sin(a) * Math.cos(b),
+				y: y + radius * Math.sin(a) * Math.cos(b),
+				z: z + radius * Math.cos(a)
+			}
+		)
+	}*/
 
 function extrude(){ // TODO
 	
@@ -190,4 +222,26 @@ function drawCircle(){
 	}
 }
 
-drawCircle()
+function drawSphere(){
+	clear()
+	const center = {x: 0, y: 0, z: 1}
+	for(p of sphere(center, 0.7)){
+		point(screen(project(p)))
+	}
+}
+
+const center = {x: 0, y: 0, z: 1}
+const sp = sphere(center, 0.7)
+
+function sphereFrame(){
+	const dt = 1 / FPS
+	dz += 1*dt
+	angle += 2 * Math.PI * dt
+	clear()
+	for(const v of sp){
+		point(screen(project(translate_z(rotate_yz(v, angle), dz))))
+	}
+	setTimeout(sphereFrame, 1000 / FPS)
+}
+
+setTimeout(sphereFrame, 1000 / FPS)
