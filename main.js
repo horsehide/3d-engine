@@ -15,8 +15,8 @@ y` = y / z
 
 */
 
-game.width = 600
-game.height = 600
+game.width = 800
+game.height = 800
 
 const ctx = game.getContext("2d")
 
@@ -136,8 +136,7 @@ function sphere({x, y, z}, radius){
 	// y = y0 + r*sin(a)*sin(b)
 	// z = z0 + r*cos(a)
 	const points = []
-	let a = 0, b = 0
-	for(let a = 0; a < Math.PI; a += 0.3){
+	for(let a = 0; a <= Math.PI; a += 0.3){
 		for(let b = 0; b < 2 * Math.PI; b += 0.3){
 			points.push({
 					x: x + radius * Math.sin(a) * Math.cos(b),
@@ -161,7 +160,7 @@ function sphere({x, y, z}, radius){
 		)
 	}*/
 
-function extrude(){ // TODO
+function extrude({x, y, z}, {dx, dy, dz}){
 	
 }
 
@@ -230,8 +229,12 @@ function drawSphere(){
 	}
 }
 
-const center = {x: 0, y: 0, z: 1}
+const center = {x: 0, y: 0, z: 0}
 const sp = sphere(center, 0.7)
+
+console.log(sp.length)
+
+let pauseTId
 
 function sphereFrame(){
 	const dt = 1 / FPS
@@ -241,7 +244,42 @@ function sphereFrame(){
 	for(const v of sp){
 		point(screen(project(translate_z(rotate_yz(v, angle), dz))))
 	}
-	setTimeout(sphereFrame, 1000 / FPS)
+	pauseTId = setTimeout(sphereFrame, 1000 / FPS)
 }
 
-setTimeout(sphereFrame, 1000 / FPS)
+const plane = [
+	{x: 0.5, y: 0.5, z: 0.5},
+	{x: -0.5, y: 0.5, z: 0.5},
+	{x: -0.5, y: -0.5, z: 0.5},
+	{x: 0.5, y: -0.5, z: 0.5},
+]
+
+function extrudeFrame(){
+	const dt = 1 / FPS
+	dz += 1*dt
+	clear()
+	for(p of plane){
+		point(screen(project(extrude(p, {dx: dz, dy: 0, dz: 0}))))
+	}
+	pauseTId = setTimeout(extrudeFrame, 1000 / FPS)
+}
+
+setTimeout(extrudeFrame, 1000 / FPS)
+
+let isPaused = false
+pause.innerText = "play"
+
+document.addEventListener("keydown", e => {
+	if(e.code === "Space"){
+		e.preventDefault()
+		if(isPaused){
+			isPaused = false
+			pause.innerText = "play"
+			extrudeFrame()
+		} else {
+			isPaused = true
+			pause.innerText = "pause"
+			clearTimeout(pauseTId)
+		}
+	}
+})
